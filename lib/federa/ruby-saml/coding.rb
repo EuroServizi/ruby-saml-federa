@@ -1,7 +1,7 @@
 require "cgi"
 require 'zlib'
 
-module Onelogin
+module Federa
   module Saml
     module Coding
       def decode(encoded)

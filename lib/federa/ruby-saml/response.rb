@@ -7,7 +7,7 @@ require "openssl"
 require "digest/sha1"
 
 # Only supports SAML 2.0
-module Onelogin
+module Federa
   module Saml
 
     class Response
@@ -123,7 +123,7 @@ module Onelogin
         # The idp_cert needs to be populated before the validate_response_state method
         
         if settings 
-          Onelogin::Saml::Metadata.new(settings).get_idp_metadata
+          Federa::Saml::Metadata.new(settings).get_idp_metadata
         end
           return false if validate_structure(soft) == false
           return false if validate_response_state(soft) == false

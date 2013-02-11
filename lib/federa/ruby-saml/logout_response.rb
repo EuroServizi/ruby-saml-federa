@@ -2,7 +2,7 @@
 
 require "rexml/document"
 
-module Onelogin
+module Federa
   module Saml
     class LogoutResponse
       include Coding
