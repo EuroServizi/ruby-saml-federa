@@ -33,7 +33,7 @@ module Federa::Saml
       root.attributes['IssueInstant'] = time
       root.attributes['Version'] = "2.0"
       root.attributes['ProtocolBinding'] = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-      root.attributes['AttributeConsumingServiceIndex'] = "2"
+      #root.attributes['AttributeConsumingServiceIndex'] = "2"
       root.attributes['ForceAuthn'] = "false"
       root.attributes['IsPassive'] = "false"
 
@@ -53,7 +53,7 @@ module Federa::Saml
       if @settings.name_identifier_format != nil
         root.add_element "saml2p:NameIDPolicy", { 
             # Might want to make AllowCreate a setting?
-            "AllowCreate"     => "false",
+            "AllowCreate"     => "true",
             "Format"          => @settings.name_identifier_format[1],
             "SPNameQualifier" => @settings.sp_name_qualifier
         }
