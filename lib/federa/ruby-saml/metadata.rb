@@ -245,11 +245,8 @@ module Federa
           params.merge!(extra_parameters)
         end
         # compress GET requests to try and stay under that 8KB request limit
-        
         #fa il deflate di samlrequest
-        #params[type] = encode( deflate( message ) )
-        
-
+        params[type] = encode( deflate( message ) )
         Logging.debug "#{type}=#{params[type]}"
         
         uri = Addressable::URI.parse(url)
@@ -259,12 +256,7 @@ module Federa
           # solution to stevenwilkin's parameter merge
           uri.query_values = params.merge(uri.query_values)
         end
-        #creo l'url per la redirect con samlrequest
-        url = @URL+"?"+type+"="+encode(deflate(message))
-        #url = uri.to_s
-        params.each{ |key, value| 
-          url += "&"+key.to_s+"="+value.to_s
-        }
+        url = uri.to_s
         Logging.debug "Sending to URL #{url}"
         return url
       end
