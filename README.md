@@ -1,99 +1,99 @@
-# Ruby SAML [![Build Status](https://secure.travis-ci.org/onelogin/ruby-saml.png)](http://travis-ci.org/onelogin/ruby-saml)
+# Ruby SAML FEDERA
 
-The Ruby SAML library is for implementing the client side of a SAML authorization, i.e. it provides a means for managing authorization initialization and confirmation requests from identity providers.
+The Ruby SAML Federa library is a fork of Ruby SAML and it is used for implementing the client side of a SAML authorization, initialization and confirmation requests
+with FedERa's identity providers.
 
-SAML authorization is a two step process and you are expected to implement support for both.
 
 ## The initialization phase
 
-This is the first request you will get from the identity provider. It will hit your application at a specific URL (that you've announced as being your SAML initialization point). The response to this initialization, is a redirect back to the identity provider, which can look something like this (ignore the saml_settings method call for now):
+This is the first request you will get from the identity provider. It will hit your application at a specific URL (that you've announced as being your SAML initialization point). The response to this initialization, is a redirect back to the identity provider, which can look something like this:
 
 ```ruby
     def init
-      request = Onelogin::Saml::Authrequest.new
-      redirect_to(request.create(saml_settings))
+        #your login with Federa method..
+        #create an instance of Federa::Saml::Authrequest
+        request = Federa::Saml::Authrequest.new(get_saml_settings)
+        auth_request = request.create
+        # Based on the IdP metadata, select the appropriate binding 
+        # and return the action to perform to the controller
+        meta = Federa::Saml::Metadata.new(get_saml_settings)
+        signature = get_signature(auth_request.uuid,auth_request.request,"http://www.w3.org/2000/09/xmldsig#rsa-sha1")
+        redirect meta.create_sso_request( auth_request.request, {   :RelayState   => request.uuid,
+                                                                  :SigAlg       => "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
+                                                                  :Signature    => signature
+                                                              } )
     end
+
+    
+    def get_signature(relayState, request, sigAlg)
+        #url encode of relayState
+        relayState_encoded = escape(relayState)
+        
+        #deflate and base64 of samlrequest
+        deflate_request_B64 = encode(deflate(request))
+        
+        #url encode of samlrequest
+        deflate_request_B64_encoded = escape(deflate_request_B64)
+        
+        #url encode of sigAlg
+        sigAlg_encoded = escape(sigAlg)
+        
+        querystring="SAMLRequest=#{deflate_request_B64_encoded}&RelayState=#{relayState_encoded}&SigAlg=#{sigAlg_encoded}"
+        digest = OpenSSL::Digest::SHA1.new(querystring.strip)  
+        pk = OpenSSL::PKey::RSA.new File.read(File.join("path.of.cert.pem"))
+        qssigned = pk.sign(digest,querystring.strip)
+        Base64.encode64(qssigned).gsub(/\n/, "")
+    end 
 ```
+
 
 Once you've redirected back to the identity provider, it will ensure that the user has been authorized and redirect back to your application for final consumption, this is can look something like this (the authorize_success and authorize_failure methods are specific to your application):
 
 ```ruby
     def consume
-      response          = Onelogin::Saml::Response.new(params[:SAMLResponse])
-      response.settings = saml_settings
+        #your assertion_consumer method...
+        saml_response = @request.params['SAMLResponse'] 
+        if !saml_response.nil? 
+          #read the settings
+          settings = get_saml_settings
+          #create an instance of response
+          response = Federa::Saml::Response.new(saml_response)
+          response.settings = settings
 
-      if response.is_valid? && user = current_account.users.find_by_email(response.name_id)
-        authorize_success(user)
-      else
-        authorize_failure(user)
+          #validation of response
+          if response.is_valid? 
+            authorize_success(response.attributes)
+          else
+            authorize_failure(response.attributes)
+          end
       end
-    end
+    end  
 ```
 
 In the above there are a few assumptions in place, one being that the response.name_id is an email address. This is all handled with how you specify the settings that are in play via the saml_settings method. That could be implemented along the lines of this:
 
 ```ruby
-  def saml_settings
-    settings = Onelogin::Saml::Settings.new
-
-    settings.assertion_consumer_service_url = "http://#{request.host}/saml/finalize"
-    settings.issuer                         = request.host
-    settings.idp_sso_target_url             = "https://app.onelogin.com/saml/signon/#{OneLoginAppId}"
-    settings.idp_cert_fingerprint           = OneLoginAppCertFingerPrint
-    settings.name_identifier_format         = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
-    # Optional for most SAML IdPs
-    settings.authn_context = "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"
-
-    settings
-  end
+    def get_saml_settings  
+        settings = Federa::Saml::Settings.new
+        settings.assertion_consumer_service_url     = <i>String, url of your assertion consumer</i>
+        settings.issuer                             = <i>String, host of your service provider or metadata url</i>
+        settings.sp_cert                            = <i>String, path of your cert.pem</i>
+        settings.single_logout_service_url          = <i>String, url of idp logout service'</i>
+        settings.sp_name_qualifier                  = <i>String, name qualifier of service processor  (like your metadata url)</i>
+        settings.idp_name_qualifier                 = <i>String, name qualifier of identity provider (idp metadata)</i>
+        settings.name_identifier_format             = <i>Array, format names ( ["urn:oasis:names:tc:SAML:2.0:nameid-format:persistent", "urn:oasis:names:tc:SAML:2.0:nameid-format:transient", "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"] )</i>
+        settings.destination_service_url            = <i>String, url of proxy for single sign on (in Idp)</i>
+        settings.single_logout_destination          = <i>String, url of logout request</i> 
+        settings.authn_context                      = <i>Array, types of permissions allowed (["urn:oasis:names:tc:SAML:2.0:ac:classes:Smartcard", "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"])</i>
+        settings.requester_identificator            = <i>unique id of your service provider domain</i>
+        settings.skip_validation                    = <i>Bool, skip validation of assertion or response (false)</i>
+        settings.idp_sso_target_url                 = <i>String, url of idp sso proxy ("https://federatest.lepida.it/gw/SSOProxy/SAML2")</i>
+        settings.idp_metadata                       = <i>String, url of idp metadata ("https://federatest.lepida.it/gw/metadata")</i>
+        settings
+    end  
 ```
 
-What's left at this point, is to wrap it all up in a controller and point the initialization and consumption URLs in OneLogin at that. A full controller example could look like this:
 
-```ruby
-  # This controller expects you to use the URLs /saml/init and /saml/consume in your OneLogin application.
-  class SamlController < ApplicationController
-    def init
-      request = Onelogin::Saml::Authrequest.new
-      redirect_to(request.create(saml_settings))
-    end
-
-    def consume
-      response          = Onelogin::Saml::Response.new(params[:SAMLResponse])
-      response.settings = saml_settings
-
-      if response.is_valid? && user = current_account.users.find_by_email(response.name_id)
-        authorize_success(user)
-      else
-        authorize_failure(user)
-      end
-    end
-
-    private
-
-    def saml_settings
-      settings = Onelogin::Saml::Settings.new
-
-      settings.assertion_consumer_service_url = "http://#{request.host}/saml/consume"
-      settings.issuer                         = request.host
-      settings.idp_sso_target_url             = "https://app.onelogin.com/saml/signon/#{OneLoginAppId}"
-      settings.idp_cert_fingerprint           = OneLoginAppCertFingerPrint
-      settings.name_identifier_format         = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
-      # Optional for most SAML IdPs
-      settings.authn_context = "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"
-
-      settings
-    end
-  end
-```
-
-If are using saml:AttributeStatement to transfare metadata, like the user name, you can access all the attributes through response.attributes. It
-contains all the saml:AttributeStatement with its 'Name' as a indifferent key and the one saml:AttributeValue as value.
-
-  response          = Onelogin::Saml::Response.new(params[:SAMLResponse])
-  response.settings = saml_settings
-
-  response.attributes[:username]
 
 ## Service Provider Metadata
 
@@ -109,8 +109,8 @@ to the IdP settings.
   class SamlController < ApplicationController
     # ... the rest of your controller definitions ...
     def metadata
-      settings = Account.get_saml_settings
-      meta = Onelogin::Saml::Metadata.new
+      meta = Federa::Saml::Metadata.new
+      settings = get_saml_settings
       render :xml => meta.generate(settings)
     end
   end
@@ -120,7 +120,5 @@ to the IdP settings.
 
 * Fork the project.
 * Make your feature addition or bug fix.
-* Add tests for it. This is important so I don't break it in a
-  future version unintentionally.
 * Commit, do not mess with rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
-* Send me a pull request. Bonus points for topic branches.
+* Send me a pull request.

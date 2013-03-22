@@ -2,13 +2,12 @@ module Federa
   module Saml
     class Settings
      
-      attr_accessor :assertion_consumer_service_url, :issuer, :sp_name_qualifier, :sp_cert
-      attr_accessor :idp_sso_target_url, :idp_cert_fingerprint, :idp_cert, :name_identifier_format, :idp_metadata, :idp_metadata_ttl, :idp_name_qualifier
-      attr_accessor :authn_context, :requester_identificator
-      attr_accessor :assertion_consumer_service_binding, :idp_slo_target_url
-      attr_accessor :name_identifier_value
-      attr_accessor :sessionindex
-      attr_accessor :single_logout_service_url, :single_logout_service_binding, :single_logout_destination, :destination_service_url
+      attr_accessor :sp_name_qualifier, :sp_cert
+      attr_accessor :idp_sso_target_url, :idp_cert_fingerprint, :idp_cert, :idp_slo_target_url, :idp_metadata, :idp_metadata_ttl, :idp_name_qualifier
+      attr_accessor :assertion_consumer_service_binding, :assertion_consumer_service_url
+      attr_accessor :name_identifier_value, :name_identifier_format
+      attr_accessor :sessionindex, :issuer, :destination_service_url, :authn_context, :requester_identificator
+      attr_accessor :single_logout_service_url, :single_logout_service_binding, :single_logout_destination
       attr_accessor :skip_validation
     
       def initialize(config = {})

@@ -72,11 +72,9 @@ module Federa::Saml
 			str += "<input name='RelayState' value='ruby-saml' type='hidden' />\n"
 			@request_params.each_pair do |key, value|
 				str += "<input name=\"#{key}\" value=\"#{value}\" type='hidden' />\n"
-				#str += "<input name=\"#{key}\" value=\"#{CGI.escape(value)}\" type='hidden' />\n"
 			end
 			str += "</form></body></html>\n"
-			
-			Logging.debug "Created form:\n#{str}"
+			#Logging.debug "Created form:\n#{str}"
 			return str
 		end
 	end	

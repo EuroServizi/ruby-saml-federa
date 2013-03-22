@@ -185,7 +185,7 @@ module Federa
         extract_certificate(doc)
         return doc
 
-
+        # USE OF CACHE WITH CERTIFICATE
         # lookup = @cache.read(id)
         # if lookup != nil
         #   Logging.debug "IdP metadata cached lookup for #{@settings.idp_metadata}"
@@ -245,9 +245,9 @@ module Federa
           params.merge!(extra_parameters)
         end
         # compress GET requests to try and stay under that 8KB request limit
-        #fa il deflate di samlrequest
+        #deflate of samlrequest
         params[type] = encode( deflate( message ) )
-        Logging.debug "#{type}=#{params[type]}"
+        #Logging.debug "#{type}=#{params[type]}"
         
         uri = Addressable::URI.parse(url)
         if uri.query_values == nil
@@ -257,7 +257,7 @@ module Federa
           uri.query_values = params.merge(uri.query_values)
         end
         url = uri.to_s
-        Logging.debug "Sending to URL #{url}"
+        #Logging.debug "Sending to URL #{url}"
         return url
       end
 

@@ -98,13 +98,6 @@ module Federa::Saml
 
       #Logging.debug "Created AuthnRequest: #{@request}"
 
-      #params.each_pair do |key, value|
-      #  #request_params << "&#{key}=#{CGI.escape(value.to_s)}"
-      # @request_params[key] = value
-      #end
-
-      #settings.idp_sso_target_url + request_params
-
       return self
 
     end
@@ -159,7 +152,6 @@ module Federa::Saml
         uri.query_values = @request_params.merge(uri.query_values)
       end
       url = uri.to_s
-      #url = @URL + "?SAMLRequest=" + @request_params["SAMLRequest"]
       #Logging.debug "Sending to URL #{url}"
       return url
     end

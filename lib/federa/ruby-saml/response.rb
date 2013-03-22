@@ -44,9 +44,7 @@ module Federa
       # The value of the user identifier as designated by the initialization request response
       def name_id
         @name_id ||= begin
-          # non va..  node = REXML::XPath.first(document, "/saml2p:Response/saml2:Assertion[@ID='#{document.signed_element_id}']/saml2:Subject/saml2:NameID", { "p" => PROTOCOL, "a" => ASSERTION })
           node = REXML::XPath.first(document, "/saml2p:Response/saml2:Assertion[@ID='#{document.signed_element_id}']/saml2:Subject/saml2:NameID")
-          #node ||=  REXML::XPath.first(document, "/p:Response[@ID='#{document.signed_element_id}']/a:Assertion/a:Subject/a:NameID", { "p" => PROTOCOL, "a" => ASSERTION })
           node ||=  REXML::XPath.first(document, "/saml2p:Response[@ID='#{document.signed_element_id}']/saml2:Assertion/saml2:Subject/saml2:NameID")
           node.nil? ? nil : node.text
         end
@@ -111,12 +109,6 @@ module Federa
       def validation_error(message)
         raise ValidationError.new(message)
       end
-
-      # def validate(soft = true)
-      #   debugger
-      #   val = validate_structure(soft) && validate_response_state(soft) && validate_conditions(soft) && document.validate(get_fingerprint, soft) && success?
-      #   val
-      # end
 
     def validate(soft = true)
         # prime the IdP metadata before the document validation. 
