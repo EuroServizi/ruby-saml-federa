@@ -75,20 +75,20 @@ In the above there are a few assumptions in place, one being that the response.n
 ```ruby
     def get_saml_settings  
         settings = Federa::Saml::Settings.new
-        settings.assertion_consumer_service_url     = <i>String, url of your assertion consumer</i>
-        settings.issuer                             = <i>String, host of your service provider or metadata url</i>
-        settings.sp_cert                            = <i>String, path of your cert.pem</i>
-        settings.single_logout_service_url          = <i>String, url of idp logout service'</i>
-        settings.sp_name_qualifier                  = <i>String, name qualifier of service processor  (like your metadata url)</i>
-        settings.idp_name_qualifier                 = <i>String, name qualifier of identity provider (idp metadata)</i>
-        settings.name_identifier_format             = <i>Array, format names ( ["urn:oasis:names:tc:SAML:2.0:nameid-format:persistent", "urn:oasis:names:tc:SAML:2.0:nameid-format:transient", "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"] )</i>
-        settings.destination_service_url            = <i>String, url of proxy for single sign on (in Idp)</i>
-        settings.single_logout_destination          = <i>String, url of logout request</i> 
-        settings.authn_context                      = <i>Array, types of permissions allowed (["urn:oasis:names:tc:SAML:2.0:ac:classes:Smartcard", "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"])</i>
-        settings.requester_identificator            = <i>unique id of your service provider domain</i>
-        settings.skip_validation                    = <i>Bool, skip validation of assertion or response (false)</i>
-        settings.idp_sso_target_url                 = <i>String, url of idp sso proxy ("https://federatest.lepida.it/gw/SSOProxy/SAML2")</i>
-        settings.idp_metadata                       = <i>String, url of idp metadata ("https://federatest.lepida.it/gw/metadata")</i>
+        settings.assertion_consumer_service_url     = ...String, url of your assertion consumer.
+        settings.issuer                             = ...String, host of your service provider or metadata url.
+        settings.sp_cert                            = ...String, path of your cert.pem.
+        settings.single_logout_service_url          = ...String, url of idp logout service'.
+        settings.sp_name_qualifier                  = ...String, name qualifier of service processor  (like your metadata url).
+        settings.idp_name_qualifier                 = ...String, name qualifier of identity provider (idp metadata).
+        settings.name_identifier_format             = ...Array, format names ( ["urn:oasis:names:tc:SAML:2.0:nameid-format:persistent", "urn:oasis:names:tc:SAML:2.0:nameid-format:transient", "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"] ).
+        settings.destination_service_url            = ...String, url of proxy for single sign on (in Idp).
+        settings.single_logout_destination          = ...String, url of logout request. 
+        settings.authn_context                      = ...Array, types of permissions allowed (["urn:oasis:names:tc:SAML:2.0:ac:classes:Smartcard", "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport"]).
+        settings.requester_identificator            = ...unique id of your service provider domain.
+        settings.skip_validation                    = ...Bool, skip validation of assertion or response (false).
+        settings.idp_sso_target_url                 = ...String, url of idp sso proxy ("https://federatest.lepida.it/gw/SSOProxy/SAML2").
+        settings.idp_metadata                       = ...String, url of idp metadata ("https://federatest.lepida.it/gw/metadata").
         settings
     end  
 ```
