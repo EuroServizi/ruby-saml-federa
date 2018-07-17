@@ -29,7 +29,7 @@ require "openssl"
 require 'nokogiri'
 require "digest/sha1"
 require "digest/sha2"
-require "Federa/ruby-saml/validation_error"
+require "federa/ruby-saml/validation_error"
 
 module XMLSecurity
 
